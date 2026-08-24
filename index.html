@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>التحقق</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://openfpcdn.io/fingerprintjs/v3"></script>
+</head>
+<body style="text-align:center; padding-top:50px; font-family:sans-serif;">
+<h2>جاري التحقق من الجهاز...</h2>
+<p id="s">يرجى الانتظار</p>
+<script>
+let tg = window.Telegram.WebApp;
+tg.expand();
+FingerprintJS.load().then(fp => fp.get()).then(r => {
+  document.getElementById('s').innerText = "تم بنجاح";
+  tg.sendData(JSON.stringify({device_id: r.visitorId}));
+});
+</script>
+</body>
+</html>
