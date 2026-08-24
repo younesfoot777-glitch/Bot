@@ -1,36 +1,76 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>التحقق</title>
+    <title>جاري التحقق من الجهاز...</title>
+    <!-- مكتبة تيليجرام الرسمية للـ Web App -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
-            background-color: #17212b;
+            font-family: Tahoma, sans-serif;
+            background-color: #121212;
             color: #ffffff;
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
+            text-align: center;
+            padding-top: 50px;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <h3>جاري تأكيد الاتصال...</h3>
+
+    <h2>جاري فحص الأمان وجهازك...</h2>
+    <div class="loader"></div>
+    <p id="status">يرجى الانتظار قليلاً</p>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
+        // تفعيل الـ Web App
+        Telegram.WebApp.ready();
+        Telegram.WebApp.expand();
 
-        // إرسال إشارة فورية للبوت بدون أي fetch خوارزمي
-        setTimeout(() => {
-            tg.sendData(JSON.stringify({ action: "verify" }));
-            setTimeout(() => { tg.close(); }, 200);
-        }, 100);
+        async function checkDevice() {
+            try {
+                // جلب الـ IP ومعلومات الشبكة لجهاز المستخدم الحقيقي
+                let response = await fetch('https://ipinfo.io/json');
+                let data = await response.json();
+                
+                let ip = data.ip || 'unknown';
+                let org = (data.org || "").toLowerCase();
+                
+                // قائمة كلمات الـ VPN والـ Proxy والستريمنغ
+                let badKeywords = ['vpn', 'proxy', 'hosting', 'datacenter', 'cloudflare', 'digitalocean', 'm247', 'ovh', 'linode', 'vultr', 'amazon', 'google', 'expressvpn', 'nordvpn'];
+                let isVpn = badKeywords.some(keyword => org.includes(keyword));
+
+                // إرسال البيانات للبوت
+                Telegram.WebApp.sendData(JSON.stringify({
+                    ip: ip,
+                    is_vpn: isVpn
+                }));
+
+            } catch (error) {
+                // في حال حصل خطأ في جلب الـ IP
+                Telegram.WebApp.sendData(JSON.stringify({
+                    ip: 'unknown',
+                    is_vpn: false
+                }));
+            }
+        }
+
+        // تشغيل الفحص فور فتح الصفحة
+        checkDevice();
     </script>
+
 </body>
 </html>
-
