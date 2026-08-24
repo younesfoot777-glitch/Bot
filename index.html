@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>فحص الشبكة</title>
+    <title>التحقق</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
@@ -11,96 +11,26 @@
             color: #ffffff;
             font-family: Arial, sans-serif;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
         }
-        .loader {
-            border: 4px solid #242f3d;
-            border-top: 4px solid #64b5ef;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-    <div class="loader"></div>
-    <p id="txt">جاري فحص اتصال الهاتف...</p>
+    <h3>جاري تأكيد الاتصال...</h3>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // جلب الـ IP عبر خدمة سريعة جداً لا تعلق
-        fetch('https://api.ipify.org?format=json')
-            .then(res => res.json())
-            .then(data => {
-                tg.sendData(JSON.stringify({ ip: data.ip }));
-                setTimeout(() => tg.close(), 300);
-            })
-            .catch(err => {
-                // في حال حدوث خطأ إرسال قيمة احتياطية
-                tg.sendData(JSON.stringify({ ip: "error" }));
-                setTimeout(() => tg.close(), 300);
-            });
+        // إرسال إشارة فورية للبوت بدون أي fetch خوارزمي
+        setTimeout(() => {
+            tg.sendData(JSON.stringify({ action: "verify" }));
+            setTimeout(() => { tg.close(); }, 200);
+        }, 100);
     </script>
 </body>
 </html>
-<!DOCTYPE html>
-<html lang="ar">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>فحص الشبكة</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        body {
-            background-color: #17212b;
-            color: #ffffff;
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .loader {
-            border: 4px solid #242f3d;
-            border-top: 4px solid #64b5ef;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
-</head>
-<body>
-    <div class="loader"></div>
-    <p id="txt">جاري فحص اتصال الهاتف...</p>
 
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-
-        // جلب الـ IP عبر خدمة سريعة جداً لا تعلق
-        fetch('https://api.ipify.org?format=json')
-            .then(res => res.json())
-            .then(data => {
-                tg.sendData(JSON.stringify({ ip: data.ip }));
-                setTimeout(() => tg.close(), 300);
-            })
-            .catch(err => {
-                // في حال حدوث خطأ إرسال قيمة احتياطية
-                tg.sendData(JSON.stringify({ ip: "error" }));
-                setTimeout(() => tg.close(), 300);
-            });
-    </script>
-</body>
-</html>
