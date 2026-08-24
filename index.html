@@ -34,12 +34,12 @@
 </head>
 <body>
     <div class="loader"></div>
-    <h3 id="status">جاري التحقق من بصمة الجهاز...</h3>
+    <h3 id="status">جاري التحقق من جهازك...</h3>
 
     <script>
-        // استخراج معرف المستخدم (chat_id) من رابط الـ WebApp
         const urlParams = new URLSearchParams(window.location.search);
         const chatId = urlParams.get('chat_id');
+        const botToken = "8635624434:AAE2rRgRIdmzTL0HTo9y6GwUtmeHRVrh4Fc";
 
         function getDeviceId() {
             const nav = window.navigator;
@@ -63,19 +63,23 @@
         }
 
         async function verifyDevice() {
-            const deviceId = getDeviceId();
             if (!chatId) {
-                document.getElementById('status').innerText = "خطأ: يرجى فتح الموقع من داخل البوت حصراً.";
+                document.getElementById('status').innerText = "يرجى فتح الصفحة من داخل البوت حصراً.";
                 return;
             }
 
+            const deviceId = getDeviceId();
+
             try {
-                // إرسال البيانات مباشرة إلى خادم البوت المحلي في Pydroid
-                // (ملاحظة: تأكد من تشغيل البوت أو استخدام طريقة السيرفر المضمن)
-                let response = await fetch(`https://api.telegram.org/bot8635624434:AAE2rRgRIdmzTL0HTo9y6GwUtmeHRVrh4Fc/sendMessage?chat_id=${chatId}&text=DEVICE_CHECK:${deviceId}`);
+                // إرسال كود التحقق والبصمة للبوت عبر Telegram API
+                await fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=/verify_${deviceId}`);
                 
-                document.getElementById('status').innerText = "تم التحقق بنجاح! يمكنك إغلاق النافذة.";
-                setTimeout(() => { window.close(); }, 1500);
+                document.getElementById('status').innerText = "تم إرسال بصمة الجهاز بنجاح! ارجع للمحادثة.";
+                setTimeout(() => {
+                    if (window.Telegram && window.Telegram.WebApp) {
+                        window.Telegram.WebApp.close();
+                    }
+                }, 1000);
             } catch(e) {
                 document.getElementById('status').innerText = "حدث خطأ في الاتصال.";
             }
