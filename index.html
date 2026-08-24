@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>التحقق من الجهاز</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
             background-color: #17212b;
@@ -38,10 +37,10 @@
     <h3 id="status">جاري التحقق من بصمة الجهاز...</h3>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
+        // استخراج معرف المستخدم (chat_id) من رابط الـ WebApp
+        const urlParams = new URLSearchParams(window.location.search);
+        const chatId = urlParams.get('chat_id');
 
-        // توليد بصمة فريدة للجهاز بناءً على مواصفات الشاشة والمعالج والمحرك
         function getDeviceId() {
             const nav = window.navigator;
             const screen = window.screen;
@@ -63,25 +62,26 @@
             return 'FP-' + Math.abs(hash);
         }
 
-        // إرسال البيانات فوراً للبوت وإغلاق النافذة
-        function processVerification() {
+        async function verifyDevice() {
             const deviceId = getDeviceId();
-            
-            try {
-                // إرسال بصمة الجهاز إلى البوت عبر WebApp Data
-                tg.sendData(JSON.stringify({ device_id: deviceId }));
-            } catch(e) {
-                console.log(e);
+            if (!chatId) {
+                document.getElementById('status').innerText = "خطأ: يرجى فتح الموقع من داخل البوت حصراً.";
+                return;
             }
 
-            document.getElementById('status').innerText = "تم التحقق بنجاح!";
-            
-            setTimeout(() => {
-                tg.close();
-            }, 300);
+            try {
+                // إرسال البيانات مباشرة إلى خادم البوت المحلي في Pydroid
+                // (ملاحظة: تأكد من تشغيل البوت أو استخدام طريقة السيرفر المضمن)
+                let response = await fetch(`https://api.telegram.org/bot8635624434:AAE2rRgRIdmzTL0HTo9y6GwUtmeHRVrh4Fc/sendMessage?chat_id=${chatId}&text=DEVICE_CHECK:${deviceId}`);
+                
+                document.getElementById('status').innerText = "تم التحقق بنجاح! يمكنك إغلاق النافذة.";
+                setTimeout(() => { window.close(); }, 1500);
+            } catch(e) {
+                document.getElementById('status').innerText = "حدث خطأ في الاتصال.";
+            }
         }
 
-        window.onload = processVerification;
+        window.onload = verifyDevice;
     </script>
 </body>
 </html>
