@@ -1,20 +1,69 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar">
 <head>
-<title>التحقق</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="https://openfpcdn.io/fingerprintjs/v3"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التحقق من الجهاز</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            background-color: #1c1c1e;
+            color: #ffffff;
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        .loader {
+            border: 4px solid #333;
+            border-top: 4px solid #0088cc;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
-<body style="text-align:center; padding-top:50px; font-family:sans-serif;">
-<h2>جاري التحقق من الجهاز...</h2>
-<p id="s">يرجى الانتظار</p>
-<script>
-let tg = window.Telegram.WebApp;
-tg.expand();
-FingerprintJS.load().then(fp => fp.get()).then(r => {
-  document.getElementById('s').innerText = "تم بنجاح";
-  tg.sendData(JSON.stringify({device_id: r.visitorId}));
-});
-</script>
+<body>
+    <div class="loader"></div>
+    <h2>جاري التحقق من الجهاز...</h2>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        // توليد بصمة جهاز سريعة وبسيطة بدون استدعاء مكتبات خارجية بطيئة
+        function generateSimpleFingerprint() {
+            const nav = window.navigator;
+            const screen = window.screen;
+            let str = nav.userAgent + nav.language + screen.colorDepth + screen.width + "x" + screen.height + nav.hardwareConcurrency;
+            
+            // تحويل النص إلى Hash بسيط
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                let char = str.charCodeAt(i);
+                hash = (hash << 5) - hash + char;
+                hash |= 0;
+            }
+            return 'DEV-' + Math.abs(hash);
+        }
+
+        setTimeout(() => {
+            const deviceId = generateSimpleFingerprint();
+            
+            // إرسال البيانات للبوت وإغلاق الـ WebApp فوراً
+            tg.sendData(JSON.stringify({ device_id: deviceId }));
+            tg.close();
+        }, 500); // 0.5 ثانية فقط
+    </script>
 </body>
 </html>
