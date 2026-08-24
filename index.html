@@ -35,40 +35,31 @@
 </head>
 <body>
     <div class="loader"></div>
-    <h3 id="status">جاري التحقق من جهازك...</h3>
+    <h3 id="status">جاري قراءة بصمة الجهاز...</h3>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        function getDeviceId() {
-            const nav = window.navigator;
-            const screen = window.screen;
-            let rawData = [
-                nav.userAgent,
-                nav.language,
-                screen.colorDepth,
-                screen.width + 'x' + screen.height,
-                nav.hardwareConcurrency || 1,
-                new Date().getTimezoneOffset()
-            ].join('||');
-
-            let hash = 0;
-            for (let i = 0; i < rawData.length; i++) {
-                let char = rawData.charCodeAt(i);
-                hash = ((hash << 5) - hash) + char;
-                hash |= 0;
+        function getPermanentDeviceId() {
+            // البحث عن البصمة الدائمة في ذاكرة الجهاز
+            let deviceId = localStorage.getItem('unique_device_token');
+            
+            // إذا لم تكن موجودة (أول مرة يفتح البوت من الموبايل)، يتم إنشاؤها وتثبيتها
+            if (!deviceId) {
+                deviceId = 'DEV-' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+                localStorage.setItem('unique_device_token', deviceId);
             }
-            return 'FP-' + Math.abs(hash);
+            return deviceId;
         }
 
         setTimeout(() => {
-            const deviceId = getDeviceId();
-            // إرسال البيانات رسمياً عبر قنوات تليجرام WebApp الداخلية
-            tg.sendData(JSON.stringify({ device_id: deviceId }));
+            const finalDeviceId = getPermanentDeviceId();
+            // إرسال البصمة الثابتة للبوت
+            tg.sendData(JSON.stringify({ device_id: finalDeviceId }));
             document.getElementById('status').innerText = "تم التحقق، جاري إغلاق النافذة...";
-            setTimeout(() => { tg.close(); }, 500);
-        }, 600);
+            setTimeout(() => { tg.close(); }, 400);
+        }, 500);
     </script>
 </body>
 </html>
