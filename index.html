@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>التحقق من الجهاز</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
             background-color: #17212b;
@@ -37,9 +38,8 @@
     <h3 id="status">جاري التحقق من جهازك...</h3>
 
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const chatId = urlParams.get('chat_id');
-        const botToken = "8635624434:AAE2rRgRIdmzTL0HTo9y6GwUtmeHRVrh4Fc";
+        const tg = window.Telegram.WebApp;
+        tg.expand();
 
         function getDeviceId() {
             const nav = window.navigator;
@@ -62,30 +62,13 @@
             return 'FP-' + Math.abs(hash);
         }
 
-        async function verifyDevice() {
-            if (!chatId) {
-                document.getElementById('status').innerText = "يرجى فتح الصفحة من داخل البوت حصراً.";
-                return;
-            }
-
+        setTimeout(() => {
             const deviceId = getDeviceId();
-
-            try {
-                // إرسال كود التحقق والبصمة للبوت عبر Telegram API
-                await fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=/verify_${deviceId}`);
-                
-                document.getElementById('status').innerText = "تم إرسال بصمة الجهاز بنجاح! ارجع للمحادثة.";
-                setTimeout(() => {
-                    if (window.Telegram && window.Telegram.WebApp) {
-                        window.Telegram.WebApp.close();
-                    }
-                }, 1000);
-            } catch(e) {
-                document.getElementById('status').innerText = "حدث خطأ في الاتصال.";
-            }
-        }
-
-        window.onload = verifyDevice;
+            // إرسال البيانات رسمياً عبر قنوات تليجرام WebApp الداخلية
+            tg.sendData(JSON.stringify({ device_id: deviceId }));
+            document.getElementById('status').innerText = "تم التحقق، جاري إغلاق النافذة...";
+            setTimeout(() => { tg.close(); }, 500);
+        }, 600);
     </script>
 </body>
 </html>
